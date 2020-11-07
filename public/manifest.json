@@ -4,7 +4,8 @@
   "version": "1.1",
   "manifest_version": 2,
   "background": {
-    "scripts": ["app/background.js"]
+    "page": "app/background.html",
+    "persistent": false
   },
   "browser_action": {},
   "content_scripts" : [
@@ -17,5 +18,6 @@
   "web_accessible_resources":[
     "/static/css/content.css", "/static/media/*"
   ],
-  "content_security_policy": "script-src 'self' 'sha256-GgRxrVOKNdB4LrRsVPDSbzvfdV4UqglmviH9GoBJ5jk='; object-src 'self'"
+  "content_security_policy": "script-src 'self' sha256-GgRxrVOKNdB4LrRsVPDSbzvfdV4UqglmviH9GoBJ5jk= https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
+  "permissions": ["tabs", "storage"]
 }

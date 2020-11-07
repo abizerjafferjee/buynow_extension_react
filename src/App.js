@@ -1,28 +1,59 @@
 /*global chrome*/
 
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, { Component, useState } from 'react';
 import './App.css';
+import { shortenText } from './libs/helpers'
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          {this.props.isExt ? 
-            <img src={chrome.runtime.getURL("static/media/logo.svg")} className="App-logo" alt="logo" />
-          :
-            <img src={logo} className="App-logo" alt="logo" />
-          }
+function LinkCard({ link }) {
+  return (
+    <div className="link">
 
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+      <div className="image-cover">
+        <img
+          className="image"
+          src={link.image !== undefined ? 
+              link.image :
+              require('./assets/images/default-image.jpg')}
+        />
       </div>
-    );
-  }
+
+      <p className="name">{shortenText(link.name, 90)}</p>
+      <p className="description">{link.description !== undefined && shortenText(link.description, 120)}</p>
+
+      <button href={link.url}>
+        {link.price !== undefined ?
+         link.price :
+         'Buy Now'
+        }
+      </button>
+
+    </div>
+  )
+}
+
+function Placeholder() {
+  return (
+    <div>
+      <p>Welcome to the app</p>
+    </div>
+  )
+}
+
+function App(props) {
+  const [link, setLink] = useState(null)
+
+  chrome.storage.onChanged.addListener(function(changes, namespace) {
+    const data = changes.link.newValue
+    setLink(data)
+  })
+
+  return (
+    <div className="root">
+      <div className="top-bar">Top Bar</div>
+
+      {link ? <LinkCard link={link} /> : <Placeholder />}
+    </div>
+  )
 }
 
 export default App;
