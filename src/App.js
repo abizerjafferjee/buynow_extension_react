@@ -2,9 +2,11 @@
 
 import React, { Component, useState } from 'react';
 import './App.css';
+import { AiOutlineClose } from 'react-icons/ai'
+
 import { shortenText } from './libs/helpers'
 
-function LinkCard({ link }) {
+function LinkCard({ link, clickBuy }) {
   return (
     <div className="link">
 
@@ -16,16 +18,20 @@ function LinkCard({ link }) {
               require('./assets/images/default-image.jpg')}
         />
       </div>
+      
+      <div className="content">
+        <p className="name">{shortenText(link.name, 90)}</p>
+        <p className="description">{link.description !== undefined && shortenText(link.description, 120)}</p>
+      </div>
 
-      <p className="name">{shortenText(link.name, 90)}</p>
-      <p className="description">{link.description !== undefined && shortenText(link.description, 120)}</p>
-
-      <button href={link.url}>
-        {link.price !== undefined ?
-         link.price :
-         'Buy Now'
-        }
-      </button>
+      <div className="action">
+        <button className="buy-now" onClick={() => clickBuy()}>
+          {link.price !== undefined ?
+          link.price :
+          'Buy Now'
+          }
+        </button>
+      </div>
 
     </div>
   )
@@ -33,8 +39,11 @@ function LinkCard({ link }) {
 
 function Placeholder() {
   return (
-    <div>
-      <p>Welcome to the app</p>
+    <div className="placeholder">
+      <div className="placeholder-text">
+        <h2>Genie24 is now active.</h2>
+        <p>Feel free to close the popup, it will open automatically when the livestreamer shows a new product.</p>
+      </div>
     </div>
   )
 }
@@ -47,11 +56,27 @@ function App(props) {
     setLink(data)
   })
 
+  function clickBuy() {
+    chrome.runtime.sendMessage({ 
+      type: 'click-buy-button',
+      url : link.url 
+    })
+  }
+
+  function closeFrame() {
+    chrome.runtime.sendMessage({
+      type: 'close-frame'
+    })
+  }
+
   return (
     <div className="root">
-      <div className="top-bar">Top Bar</div>
+      <div className="top-bar">
+        <img className="logo" width="34px" height="34px" src={chrome.runtime.getURL("static/media/genie24-128by128-icon-nobg.png")} />
+        <div className="close-btn" onClick={() => closeFrame()}><AiOutlineClose /></div>
+      </div>
 
-      {link ? <LinkCard link={link} /> : <Placeholder />}
+      {link ? <LinkCard link={link} clickBuy={clickBuy} /> : <Placeholder />}
     </div>
   )
 }

@@ -71,3 +71,12 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/satend
 ## License
 
 The repo is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+
+## Dev Notes (Author)
+
+Original CSP 
+"content_security_policy": "script-src 'self' sha256-GgRxrVOKNdB4LrRsVPDSbzvfdV4UqglmviH9GoBJ5jk= https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
+
+New CSP (ignores sha)
+"content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"

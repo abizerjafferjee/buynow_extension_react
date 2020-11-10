@@ -43,6 +43,7 @@
 
 .image-cover {
   border-radius: 2%;
+  /* background-color: orange; */
 }
 
 .image {
@@ -57,7 +58,21 @@
 .top-bar {
   height: 25px;
   padding: 10px;
-  background-color: blue;
+  display: flex;
+  justify-content: space-between;
+  /* background-color: blue; */
+}
+
+/* .logo {
+}*/
+
+.close-btn {
+  cursor: pointer;
+}
+
+.content {
+  height: 160px;
+  /* background-color: yellow; */
 }
 
 .name {
@@ -69,5 +84,56 @@
   font-size: 13px;
   color: #939393;
 }
+.action {
+  padding: 2px;
+  /* background-color: grey; */
+}
 
+.buy-now {
+  width: 100%;
+  display: block;
+  padding: 0.75em 1.7em;
+  margin: 0 0.3em 0.3em 0;
+  border-radius: 2%;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-family: 'Roboto',sans-serif;
+  font-weight: 400;
+  color:#FFFFFF;
+  background-color:#3369ff;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+}
+
+.buy-now:hover {
+  cursor: pointer;
+}
+
+.buy-now:active {
+  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
+}
+
+.placeholder {
+  display: flex;
+  justify-content: center;
+  height: 500px;
+}
+
+.placeholder-text {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #939393;
+}
+
+@media all and (max-width:30em){
+   buy-now {
+    display:block;
+    margin:0.4em auto;
+  }
+}
 
