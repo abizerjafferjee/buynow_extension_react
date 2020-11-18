@@ -75,8 +75,27 @@ The repo is available as open source under the terms of the [MIT License](http:/
 
 ## Dev Notes (Author)
 
+Issue 1:
+
 Original CSP 
 "content_security_policy": "script-src 'self' sha256-GgRxrVOKNdB4LrRsVPDSbzvfdV4UqglmviH9GoBJ5jk= https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 
 New CSP (ignores sha)
 "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
+
+Any external javascript calls within the content script does not need to be mentioned in CSP. It will just be ignored. That's why we use the new CSP.
+
+Issue 2:
+Non-persistent background scripts get unloaded when they are not being used. For our purpose, this is a bad thing because we have global variables that
+get deleted when the background script is unloaded, mainly the activeTabId variable.
+
+To solve this, we use a persistent background script. This has it's disadvantages, mainly scripts that remain active when they are not used consume a lot of memory and affect the entire browser.
+
+The other option is to use local storage to store global variables. But this requires permissions which may make the review process of publishing longer. This might be the option we have to go with later on.
+
+The other option is to use webrequest with firebase (https://developer.chrome.com/extensions/webRequest)
+
+useful sources:
+* https://developer.chrome.com/extensions/background_pages
+* https://github.com/firebase/quickstart-js/tree/master/auth/chromextension
+* https://stackoverflow.com/questions/17632919/chrome-extension-execute-background-page-only-once-when-chrome-starts

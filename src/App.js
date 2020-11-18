@@ -42,7 +42,7 @@ function Placeholder() {
     <div className="placeholder">
       <div className="placeholder-text">
         <h2>Genie24 is now active.</h2>
-        <p>Feel free to close the popup, it will open automatically when the livestreamer shows a new product.</p>
+        <p>Feel free to close the popup, it will open automatically when the liveseller shows a new product.</p>
       </div>
     </div>
   )
@@ -51,10 +51,15 @@ function Placeholder() {
 function App(props) {
   const [link, setLink] = useState(null)
 
-  chrome.storage.onChanged.addListener(function(changes, namespace) {
-    const data = changes.link.newValue
-    setLink(data)
-  })
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if (request.type === 'link') {
+        const data = request.link
+        setLink(data)
+        sendResponse()
+      }
+    }
+  )
 
   function clickBuy() {
     chrome.runtime.sendMessage({ 

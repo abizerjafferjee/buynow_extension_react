@@ -39,17 +39,24 @@ app.frameBorder = "none"
 app.style.borderRadius = "2%"
 app.style.backgroundColor = "#FFFFFF"
 
-
 chrome.runtime.onMessage.addListener(
    function(request, sender, sendResponse) {
       if (request.type === 'clicked-browser-action') {
         app.style.display = "block"
       } else if (request.type === 'close-frame') {
         app.style.display = "none"
+      } 
+      else if (request.type === 'window-location') {
+        sendResponse({
+          type: 'window-location',
+          payload: window.location.href
+        })
       }
    }
-);
+)
 
-chrome.runtime.sendMessage({ 
-  type: 'show-page-action'
+chrome.runtime.sendMessage({
+  type: 'show-page-action',
+  payload: window.location.href
 })
+

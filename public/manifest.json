@@ -1,16 +1,15 @@
 {
   "manifest_version": 2,
-  "version": "1.0",
-  "version_name": "1.0 beta",
+  "version": "1.2",
+  "version_name": "1.2",
   "name": "Genie24 - Youtube Livestream Shopping",
   "short_name": "Genie24",
   "description": "Genie24 chrome extension helps you easily shop the products reviewed and recommended by your favorite Youtube livestreamers.",
   "background": {
-    "page": "app/background.html",
-    "persistent": false
+    "page": "app/background.html"
   },
-  "page_action": {
-    "default_title": "Genie24 - Click to activate Youtube Livestream Popups.",
+  "browser_action": {
+    "default_title": "Genie24 - Click to activate Popups on Youtube Livestream.",
     "default_icon": {
       "128": "static/media/genie24-128by128-icon-bright.png"
     }
@@ -28,6 +27,5 @@
   "web_accessible_resources":[
     "/static/css/content.css", "/static/media/*"
   ],
-  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
-  "permissions": ["tabs", "storage"]
+  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 }

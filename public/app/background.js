@@ -12,32 +12,65 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database()
 
-const streamRef = database.ref('stream_meta')
+var allActiveTabIds = []
 var stageRef = null
 var linkRef = null
 var activeTabId = null
 var activeTabHref = null
 var activeStreamer = null
 
+chrome.runtime.onInstalled.addListener(function() {
+	chrome.browserAction.disable()
+})
+
 // Called when the user clicks on the browser action
-chrome.pageAction.onClicked.addListener(function(tab) {
-	streamEvents()
-});
+chrome.browserAction.onClicked.addListener(function(tab) {
+	if (activeTabId && activeTabHref) {
+		main()
+	} else {
+		// how can we handle if the user clicks browser action on youtube page
+		// how do we differentiate with a user click which is not on a youtube page
+		// what should happen in these two events?
+	}
+})
 
-// // Called when the user clicks on the browser action
-// chrome.browserAction.onClicked.addListener(function(tab) {
-// 	main()
-// });
+chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+	if (activeTabId && tabId === activeTabId) {
+		if (allActiveTabIds.includes(activeTabId)) {
+			const idIndex = allActiveTabIds.indexOf(activeTabId)
+			allActiveTabIds.split(idIndex, 1)
+		}
+		reset()
+	}
+})
 
-// chrome.tabs.onActivated.addListener(function(activeInfo) {
-// 	console.log(activeInfo)
-// })
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+	const thisTabId = activeInfo.tabId
+	if (allActiveTabIds.includes(thisTabId)) {
+		chrome.tabs.sendMessage(thisTabId, {type: 'window-location'}, function (response) {
+			if (response !== undefined) {
+				if (response.type === 'window-location') {
+					const url = response.payload
+					showPageAction(url)
+				}
+			}
+		})
+	} else {
+		// chrome.browserAction.disable()
+		reset()
+	}
+})
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-	if (tabId === activeTabId) {
-		if (tab.url !== activeTabHref) {
-			showPageAction()
-		}
+	if (activeTabId && tabId === activeTabId) {
+		chrome.tabs.sendMessage(tabId, {type: 'window-location'}, function (response) {
+			if (response !== undefined) {
+				if (response.type === 'window-location') {
+					const url = response.payload
+					showPageAction(url)
+				}
+			}
+		})
 	}
 })
 
@@ -46,6 +79,24 @@ chrome.runtime.onMessage.addListener(function(request, render, sendResponse) {
 	handleListenerEvents(request)
 	sendResponse()
 })
+
+function main() {
+	getStream()
+	.then(snapshot => {
+		const data = snapshot.val()
+		if (data) {
+			const key = Object.keys(data)[0]
+			const obj = data[key]
+			activeStreamer = obj.uid
+			streamEvents()
+		} else {
+			chrome.tabs.sendMessage(activeTabId, {
+				type: 'close-frame'
+			})
+		}
+	})
+}
+
 
 // Entry function for listening to stream changes
 function streamEvents() {
@@ -68,11 +119,18 @@ function handleEvents(data) {
 	
 			if (activeLinkId) {
 				preparePopup(activeLinkId)
+			} else {
+				// Show placeholder if user clicks page action but there is no staged data
+				chrome.tabs.sendMessage(activeTabId, {type: 'clicked-browser-action'});
 			}
 		} else {
 			// Show placeholder if user clicks page action but there is no staged data
 			chrome.tabs.sendMessage(activeTabId, {type: 'clicked-browser-action'});
 		}
+	} else {
+		chrome.tabs.sendMessage(activeTabId, {
+			type: 'close-frame'
+		})
 	}
 }
 
@@ -80,7 +138,10 @@ function preparePopup(linkId) {
 	linkRef = database.ref(`links/${activeStreamer}/${linkId}`)
 	linkRef.once('value', function(snapshot) {
 		const data = snapshot.val()
-		chrome.storage.local.set({"link": data}, function() {
+		chrome.tabs.sendMessage(activeTabId, {
+			type: 'link',
+			link: data
+		}, function(response) {
 			chrome.tabs.sendMessage(activeTabId, {type: 'clicked-browser-action'});
 		})
 	})
@@ -89,7 +150,8 @@ function preparePopup(linkId) {
 // Handles messages from content script
 function handleListenerEvents(request) {
 	if (request.type === 'show-page-action') {
-		showPageAction()
+		const activeUrl = request.payload
+		showPageAction(activeUrl)
 	} else if (request.type === 'click-buy-button') {
 		chrome.tabs.create({ 
 			url: request.url 
@@ -98,6 +160,8 @@ function handleListenerEvents(request) {
 		chrome.tabs.sendMessage(activeTabId, {
 			type: 'close-frame'
 		})
+	} else if (request.type === 'tabId') {
+		activeTabId = request.payload
 	}
 }
 
@@ -109,7 +173,6 @@ function reset() {
 		stageRef.off()
 		stageRef = null
 	}
-	chrome.storage.local.set({"link": null})
 	linkRef = null
 	activeTabId = null
 	activeTabHref = null
@@ -118,30 +181,34 @@ function reset() {
 
 // Query firebase to find a stream in stream_meta that has the same href
 function getStream() {
+	const streamRef = database.ref('stream_meta')
 	return streamRef.orderByChild("stream").equalTo(activeTabHref).once('value')
 }
 
-// If href is an active stream -> get active streamer
-// Sets activeTabId, activeTabHref, activeStreamer
-function showPageAction() {
+function showPageAction(url) {
 	reset()
-
+	activeTabHref = url
 	chrome.tabs.query({active: true, currentWindow:true}, function(tabs) {
 		var activeTab = tabs[0];
-		const url = new URL(activeTab.url)
 		activeTabId = activeTab.id
-		activeTabHref = url.href
-
-		getStream()
-		.then(snapshot => {
-			const data = snapshot.val()
-			if (data) {
-				const key = Object.keys(data)[0]
-				const obj = data[key]
-				activeStreamer = obj.uid
-				chrome.pageAction.show(activeTabId)
-			}
+		if (!allActiveTabIds.includes(activeTabId)) {
+			allActiveTabIds.push(activeTabId)
+		}
+		chrome.browserAction.enable(activeTab.id, function() {
+			getStream()
+			.then(snapshot => {
+				const data = snapshot.val()
+				if (data) {
+					chrome.browserAction.setBadgeText({text:'live', tabId:activeTabId})
+					main()
+				} else {
+					chrome.tabs.sendMessage(activeTabId, {
+						type: 'close-frame'
+					})
+					chrome.browserAction.setBadgeText({text: '', tabId:activeTabId})
+				}
+			})
 		})
 	})
-
 }
+
