@@ -97,7 +97,6 @@ function main() {
 	})
 }
 
-
 // Entry function for listening to stream changes
 function streamEvents() {
 	stageRef = database.ref(`streams/${activeStreamer}`)
@@ -162,7 +161,7 @@ function handleListenerEvents(request) {
 		})
 	} else if (request.type === 'tabId') {
 		activeTabId = request.payload
-	}
+	} 
 }
 
 // A reset is called to turn of any firebase listeners,
@@ -211,4 +210,97 @@ function showPageAction(url) {
 		})
 	})
 }
+
+//////////////////////////////////////////////////////////
+// New Feature
+/////////////////////////////////////////////////////////
+
+// chrome.browserAction.onClicked.addListener(function(tab) {
+// 	chrome.tabs.query({active: true, currentWindow:true}, function(tabs) {
+// 		var activeTab = tabs[0];
+// 		chrome.tabs.sendMessage(activeTab.id, {type: 'get-page-links'}, function(response) {
+// 			const relevantLinks = processLinks(response)
+// 			const productIds = processProductIds(relevantLinks)
+// 			getProducts(productIds)
+// 		})
+// 	})
+// })
+
+// function processLinks(linksObj) {
+// 	const linksArr = []
+// 	if (linksObj !== {}) {
+// 		Object.keys(linksObj).forEach(function(key) {
+// 			const child = linksObj[key]
+// 			console.log(child.target)
+// 			if (validURL(child.target, stream=true)) {
+// 				linksArr.push(child.target)
+// 			}
+// 		})
+// 	}
+// 	return linksArr
+// }
+
+// function processProductIds(linksArr) {
+// 	const productIds = []
+// 	linksArr.forEach(link => {
+// 		const target = link.split('?')[0]
+// 		const parts = target.split('/')
+// 		productIds.push({
+// 			uid: parts[parts.length - 2],
+// 			pid: parts[parts.length - 1]
+// 		})
+// 	})
+// 	return productIds
+// }
+
+// function getProducts(productIds) {
+	
+// 	const eg = productIds[0]
+// 	const streamRef = database.ref(`links/${eg.uid}`)
+// 	return streamRef.orderByChild("product_id").equalTo(eg.pid).once('value', function(snapshot) {
+// 		const data = snapshot.val()
+// 		if (data) {
+// 			const key = Object.keys(data)[0]
+// 			const obj = data[key]
+// 			chrome.tabs.sendMessage(activeTabId, {
+// 				type: 'link',
+// 				link: obj
+// 			}, function(response) {
+// 				chrome.tabs.sendMessage(activeTabId, {type: 'clicked-browser-action'});
+// 			})
+// 		}
+// 	})
+// }
+
+// function validURL(str, stream=false) {
+
+// 	if (str === undefined || str === null) {
+// 		return false
+// 	}
+
+//   if (stream) {
+//     if (!str.includes('genie24.ca')) {
+//       return false
+//     }
+// 	}
+	
+//   var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+//     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+//     '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+//     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+//     '(\\?[;&a-zA-Z\\d%_.~+=-]*)?'+ // query string
+//     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+//   if (!!pattern.test(str)) {
+//     return true
+//   }
+
+//   if (str.startsWith('http') || str.startsWith('https')) {
+//     var domain = str.split('/')[2]
+//     return !!pattern.test(domain)
+//   }
+
+//   return false
+// }
+
+
 
