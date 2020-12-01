@@ -9,7 +9,7 @@
     "page": "app/background.html"
   },
   "browser_action": {
-    "default_title": "Genie24 - Automatically actives on Livestreams.",
+    "default_title": "Genie24 - Activates on Livestreams.",
     "default_icon": {
       "128": "static/media/genie24-128by128-icon-bright.png"
     }
